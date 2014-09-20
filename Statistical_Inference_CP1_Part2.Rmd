@@ -1,0 +1,130 @@
+---
+output: pdf_document
+---
+```{r Lib, echo = FALSE, warning=FALSE}
+
+library(ggplot2)
+
+```
+#Statistical Inference CP1 Part1
+
+###Instructions
+
+Analyze the ToothGrowth dataset privided in the R datasets package. 
+
+###Steps to be competed:
+     1) Load the ToothGrowth data and perform some basic exploratory data analyses 
+     2) Provide a basic summary of the data.
+     3) Use confidence intervals and hypothesis tests to compare tooth growth by supp and dose. 
+          (Use the techniques from class even if there's other approaches worth considering)
+     4) State your conclusions and the assumptions needed for your conclusions.
+     
+###Exploratory Data Analysis
+The fist step is to load the dataset from the existing R libraries.  This dataset contains the results from a tooth growth study that measured the tooth growth in quinea pigs who were administered vitamin C.
+
+```{r DataLoad}
+library(datasets) 
+str(ToothGrowth)
+```
+By using the STR function, the data set reveals 3 Fields Len, Supp, and Dose over a time frame of 60 observations.
+
+Len - Length of the tooth
+
+Supp - Supplement type given to the subject
+
+Dose - amount administered in milligrams
+
+Out of the 60 Observations, what's the split of observations my dose and Suppliment?
+```{r}
+OJ_05 <- ToothGrowth[ToothGrowth$dose == 0.5 & ToothGrowth$supp == 'OJ', 1]
+VC_05 <- ToothGrowth[ToothGrowth$dose == 0.5 & ToothGrowth$supp == 'VC', 1]
+OJ_10 <- ToothGrowth[ToothGrowth$dose == 1.0 & ToothGrowth$supp == 'OJ', 1]
+VC_10 <- ToothGrowth[ToothGrowth$dose == 1.0 & ToothGrowth$supp == 'VC', 1]
+OJ_20 <- ToothGrowth[ToothGrowth$dose == 2.0 & ToothGrowth$supp == 'OJ', 1]
+VC_20 <- ToothGrowth[ToothGrowth$dose == 2.0 & ToothGrowth$supp == 'VC', 1]
+```
+As expected the sample size is the same for each dose and suppliment combination.
+
+OJ 0.5 milligrams = `r length(OJ_05)` Samples
+
+VC 0.5 milligrams = `r length(VC_05)` Samples
+
+OJ 1.0 milligrams = `r length(OJ_10)` Samples
+
+VC 1.0 milligrams = `r length(VC_10)` Samples
+
+OJ 2.0 milligrams = `r length(OJ_20)` Samples
+
+VC 2.0 milligrams = `r length(VC_20)` Samples
+
+
+```{r}
+g <- ggplot(data=ToothGrowth, aes(x=supp, y=len, fill=supp)) 
+g <- g + labs(title="Boxplots on supp and len (grouped by dose)")
+g <- g + geom_boxplot() + facet_wrap(~ dose)
+print(g)
+
+```
+Looking at a box plot comparing tooth growth by Suypplument dose, it can be seen that the amount of each supliment can have am impact on tooth growth.
+
+###Confidence Intervals
+The question?  Is there a significant statistical difference of tooth growth when compared dose amount between the two supplimants
+We will utilize the t confidence interval to  help determine this.  We will make a comparision for each dose level (0.5, 1.0, 2.0). 
+It is assumed that the 2 test were performed on the same 10 guinea pigs.  This allow us to use the difference for our calculations.
+
+```{r SplitDS, Echo=FALSE}
+n <- 10
+
+#Using the difference of each supp dose, Calculate mean and STd
+Diff_05 <- OJ_05 - VC_05
+Mean_05 <- mean(Diff_05)
+std_05 <- sd(Diff_05)
+
+Diff_10 <- OJ_05 - VC_05
+Mean_10 <- mean(Diff_10)
+std_10 <- sd(Diff_10)
+
+Diff_20 <- OJ_20 - VC_20
+Mean_20 <- mean(Diff_20)
+std_20 <- sd(Diff_20)
+```
+Confidence Interval for 0.5 mg Dose
+```{r}
+t.test(Diff_05)$conf
+```
+
+Confidence Interval for 1.0 mg Dose
+```{r}
+t.test(Diff_10)$conf
+
+```
+
+Confidence Interval for 2.0 mg Dose
+```{r}
+t.test(Diff_20)$conf
+```
+Based on the 95% confidence intervals, teh 2.0 dose contains 0 while the 0.5 and 1.0 does not.  This means that there is not a statistical significant difference between either method of treatment OJ or VC in the 2.0 mg dose.  However, that does not apply for the 0.5 and 1.0 does.  This supports the data as represented in the box plat above.
+
+###Hypothesis Testing
+To test the hypothesis that dose does have an affect on teeth growth, we can again use teh t-test to get this information.
+Hypothesis Test for 0.5 mg Dose
+```{r}
+t.test(Diff_05)$statistic
+```
+
+Hypothesis Test for 1.0 mg Dose
+```{r}
+t.test(Diff_10)$statistic
+
+```
+
+Hypothesis Test for 2.0 mg Dose
+```{r}
+t.test(Diff_20)$statistic
+```
+Based on the t-test the 2.0 mg dose is the only one we can reject as saying: A 2.0 mg dose of either OJ or VC does not indicate a statistical significant difference in tooth grown in guinea pigs.
+
+###Conclusions
+As shown in both the Confidence Interval and Hypothesis testing, 0.5 mg and 1.0 mg dose does show signs of statistical significant difference in growth of puinea pig teeth.  However the 2.0 mg dose does not have statistcal significant differenct in growth. 
+
+
